@@ -17,10 +17,11 @@ async function fetchZoePage() {
             timeout: 20000,
             httpsAgent,
             headers: {
-                "User-Agent":
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
-                "Accept-Language": "uk-UA,uk;q=0.9"
-            }
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+                "Accept-Language": "uk-UA,uk;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Referer": "https://www.zoe.com.ua/"
+              }
         }
     );
 
@@ -113,6 +114,7 @@ function getQueueStatus(periods) {
 app.get("/api/outage", async (req, res) => {
     try {
         const html = await fetchZoePage();
+        console.log("HTML length:", html.length);
         const article = parseLatestArticle(html);
         const queues = parseQueues(article.contentText);
 
@@ -130,11 +132,24 @@ app.get("/api/outage", async (req, res) => {
     }
 });
 
+app.get("/api/test", async (req, res) => {
+    try {
+      const html = await fetchZoePage();
+      console.log("HTML:", html.slice(0, 500)); // первые 500 символов
+      res.send("Check logs");
+    } catch (e) {
+      console.error(e);
+      res.status(500).send(e.message);
+    }
+  });
+  
+
 app.get("/api/outage/queue/:queue", async (req, res) => {
     try {
         const queue = req.params.queue;
 
         const html = await fetchZoePage();
+        console.log("HTML length:", html.length);
         const article = parseLatestArticle(html);
         const queues = parseQueues(article.contentText);
 
